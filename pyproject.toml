@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "local-ytdl-tool"
+version = "0.1.0"
+description = "A small YouTube downloader CLI powered by yt-dlp."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["yt-dlp>=2026.6.9"]
+
+[project.scripts]
+ytdl = "ytdl_tool.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ytdl_tool*"]
