@@ -48,6 +48,12 @@ ytdl -x --audio-format mp3 "https://www.youtube.com/watch?v=VIDEO_ID"
 ytdl --dry-run "https://www.youtube.com/watch?v=VIDEO_ID"
 ```
 
+指定输出目录：
+
+```bash
+ytdl -o downloads/my-videos "https://www.youtube.com/watch?v=VIDEO_ID"
+```
+
 列出可用格式：
 
 ```bash
@@ -64,6 +70,23 @@ ytdl --playlist "https://www.youtube.com/playlist?list=PLAYLIST_ID"
 
 ```bash
 ytdl --playlist --playlist-items 9 --ignore-errors "https://www.youtube.com/playlist?list=PLAYLIST_ID"
+```
+
+下载播放列表第 12 到第 99 个条目：
+
+```bash
+ytdl --playlist --playlist-items 12-99 "https://www.youtube.com/playlist?list=PLAYLIST_ID"
+```
+
+更保守地下载，降低触发限流的概率：
+
+```bash
+ytdl \
+  --sleep-requests 0.75 \
+  --sleep-interval 10 \
+  --max-sleep-interval 20 \
+  --concurrent-fragments 1 \
+  "https://www.youtube.com/watch?v=VIDEO_ID"
 ```
 
 下载字幕：
@@ -103,3 +126,21 @@ ytdl --no-remote-ejs "https://www.youtube.com/watch?v=VIDEO_ID"
 ```bash
 python -m unittest discover
 ```
+
+## 下载指定播放列表剩余集数
+
+仓库提供了一个脚本用于下载已确认可下载的第 12 到第 99 集：
+
+```bash
+scripts/download_remaining_playlist.sh
+```
+
+脚本默认会在元数据请求之间等待 `0.75` 秒，在每个视频下载前随机等待 `10-20` 秒，并把分片并发降为 `1`，降低连续下载触发限流的概率。
+
+可通过环境变量覆盖默认行为：
+
+```bash
+OUTPUT_DIR=downloads/labula PLAYLIST_ITEMS=12-99 SLEEP_INTERVAL=15 MAX_SLEEP_INTERVAL=30 RATE_LIMIT=4M scripts/download_remaining_playlist.sh
+```
+
+如果 `ytdl` 不在 `PATH` 里，可用 `YTDL_BIN` 指定命令路径。

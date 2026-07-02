@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
 
+from ytdl_tool import downloader
 from ytdl_tool.downloader import DownloadRequest, build_ydl_options, summarize_info
 from ytdl_tool.downloader import _version_is_supported
 
@@ -114,6 +115,27 @@ class BuildOptionsTest(unittest.TestCase):
         options = build_ydl_options(request)
 
         self.assertEqual(options["ratelimit"], 1572864)
+
+    def test_sleep_options(self):
+        request = DownloadRequest(
+            urls=["https://youtu.be/example"],
+            output_dir=Path("out"),
+            sleep_requests=0.75,
+            sleep_interval=10,
+            max_sleep_interval=20,
+        )
+
+        options = build_ydl_options(request)
+
+        self.assertEqual(options["sleep_interval_requests"], 0.75)
+        self.assertEqual(options["sleep_interval"], 10)
+        self.assertEqual(options["max_sleep_interval"], 20)
+
+    def test_ffmpeg_location_uses_current_python_bin(self):
+        path = downloader._default_ffmpeg_location()
+
+        if path is not None:
+            self.assertTrue((path / "ffmpeg").exists())
 
     def test_summarize_single_info(self):
         lines = summarize_info(

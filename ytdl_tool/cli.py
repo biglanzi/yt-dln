@@ -74,6 +74,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     network.add_argument("--proxy", help="proxy URL, for example socks5://127.0.0.1:1080")
     network.add_argument("--rate-limit", help="download rate limit accepted by yt-dlp, for example 2M")
+    network.add_argument("--sleep-requests", type=float, help="seconds to sleep between metadata requests")
+    network.add_argument("--sleep-interval", type=float, help="minimum seconds to sleep before each download")
+    network.add_argument("--max-sleep-interval", type=float, help="maximum seconds to sleep before each download")
     network.add_argument("--retries", default=10, type=int)
     network.add_argument("--fragment-retries", default=10, type=int)
     network.add_argument("--concurrent-fragments", default=4, type=int)
@@ -112,6 +115,9 @@ def request_from_args(args: argparse.Namespace) -> DownloadRequest:
         allow_remote_ejs=args.allow_remote_ejs,
         proxy=args.proxy,
         rate_limit=args.rate_limit,
+        sleep_requests=args.sleep_requests,
+        sleep_interval=args.sleep_interval,
+        max_sleep_interval=args.max_sleep_interval,
         retries=args.retries,
         fragment_retries=args.fragment_retries,
         concurrent_fragments=args.concurrent_fragments,

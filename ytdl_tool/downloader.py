@@ -36,6 +36,9 @@ class DownloadRequest:
     allow_remote_ejs: bool = True
     proxy: str | None = None
     rate_limit: str | None = None
+    sleep_requests: float | None = None
+    sleep_interval: float | None = None
+    max_sleep_interval: float | None = None
     retries: int = 10
     fragment_retries: int = 10
     concurrent_fragments: int = 4
@@ -83,7 +86,7 @@ def _default_js_runtime_path() -> Path | None:
         Path(value)
         for value in [
             os.environ.get("YTDL_DENO_PATH"),
-            str(Path(sys.executable).resolve().parent / "deno"),
+            str(Path(sys.executable).parent / "deno"),
             str(LOCAL_DENO_PATH),
         ]
         if value
@@ -92,6 +95,13 @@ def _default_js_runtime_path() -> Path | None:
     for path in candidates:
         if path.exists():
             return path
+    return None
+
+
+def _default_ffmpeg_location() -> Path | None:
+    ffmpeg = Path(sys.executable).parent / "ffmpeg"
+    if ffmpeg.exists():
+        return ffmpeg.parent
     return None
 
 
@@ -182,11 +192,25 @@ def build_ydl_options(request: DownloadRequest) -> dict[str, Any]:
     if request.allow_remote_ejs:
         options["remote_components"] = {"ejs:github"}
 
+    ffmpeg_location = _default_ffmpeg_location()
+    if ffmpeg_location:
+        options["ffmpeg_location"] = str(ffmpeg_location)
+
     if request.proxy:
         options["proxy"] = request.proxy
 
     if request.rate_limit:
         options["ratelimit"] = _parse_rate_limit(request.rate_limit)
+
+    if request.sleep_requests is not None:
+        options["sleep_interval_requests"] = request.sleep_requests
+
+    if request.sleep_interval is not None:
+        options["sleep_interval"] = request.sleep_interval
+        options["max_sleep_interval"] = request.max_sleep_interval or request.sleep_interval
+
+    if request.max_sleep_interval is not None and request.sleep_interval is None:
+        raise ValueError("max_sleep_interval requires sleep_interval")
 
     return options
 
